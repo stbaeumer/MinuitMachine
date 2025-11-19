@@ -1,0 +1,20 @@
+{
+  "$schema": "https://nswag.org/schema/v1.1.0/nswag.schema.json",
+  "runtime": "Net80",
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "https://api.example.com/swagger/v1/swagger.json"
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "className": "GeneratedApiClient",
+      "namespace": "MinuitMachine.Client.Services.Generated",
+      "injectHttpClient": true,
+      "disposeHttpClient": false,
+      "generateClientInterfaces": true,
+      "useBaseUrl": false,
+      "output": "Services/Generated/GeneratedApiClient.g.cs"
+    }
+  }
+}
