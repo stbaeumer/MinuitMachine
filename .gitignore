@@ -53,3 +53,17 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# .NET specific
+bin/
+obj/
+*.user
+*.userosscache
+*.suo
+*.cache
+*.swp
+*~
+.vs/
+.vscode/
+*.userprefs
+.DS_Store
