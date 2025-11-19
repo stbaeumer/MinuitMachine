@@ -1,0 +1,17 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build MinuitMachine.Client",
+      "type": "shell",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/MinuitMachine.Client",
+        "-nologo"
+      ],
+      "problemMatcher": ["$msCompile"],
+      "group": "build"
+    }
+  ]
+}

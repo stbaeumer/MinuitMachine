@@ -1,0 +1,138 @@
+@page "/apitest"
+@inject CredentialStore Credentials
+@inject ApiClient Api
+@inject LocalStorageService Storage
+
+<h2>API-Test</h2>
+
+<div>
+  <label>Server-IP</label>
+  <input style="width:100%" value="@ServerIp" @oninput="OnIpInput" placeholder="z.B. 192.168.134.142" />
+
+  <label>API Basis-URL (z.B. https://api.example.com)</label>
+  <input style="width:100%" value="@BaseUrl" @oninput="OnBaseUrlInput" placeholder="https://api.example.com" />
+
+  <label>Benutzername</label>
+  <input style="width:100%" @bind-value="Credentials.Username" @bind-value:event="oninput" />
+
+  <label>Passwort</label>
+  <input style="width:100%" type="password" @bind-value="Credentials.Password" @bind-value:event="oninput" />
+
+  <label>Swagger JSON-Pfad</label>
+  <input style="width:100%" @bind-value="SwaggerPath" @bind-value:event="oninput" placeholder="/swagger/v1/swagger.json" />
+
+  <label>Test-Endpunkt (relativer Pfad)</label>
+  <input style="width:100%" @bind-value="TestPath" @bind-value:event="oninput" placeholder="/api/health" />
+
+  <div style="margin-top:1rem; display:flex; gap:.5rem;">
+    <button class="primary" @onclick="LoadSwagger">Swagger laden</button>
+    <button @onclick="TestPing">GET testen</button>
+  </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Status))
+{
+  <h3>Ergebnis</h3>
+  <p>@Status</p>
+  @if (!string.IsNullOrEmpty(Body))
+  {
+    <pre>@Body</pre>
+  }
+}
+
+@code {
+  private string SwaggerPath = "/swagger/v1/swagger.json";
+  private string TestPath = "/api/health";
+  private string? Status;
+  private string? Body;
+  private string ServerIp = string.Empty;
+  private string BaseUrl = string.Empty;
+
+  private const string KeyServerIp = "serverIp";
+  private const string KeyBaseUrl = "baseUrl";
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (!firstRender) return;
+    var storedIp = await Storage.GetItemAsync(KeyServerIp);
+    if (!string.IsNullOrWhiteSpace(storedIp))
+    {
+      ServerIp = storedIp!;
+      StateHasChanged();
+    }
+
+    var storedBase = await Storage.GetItemAsync(KeyBaseUrl);
+    if (!string.IsNullOrWhiteSpace(storedBase))
+    {
+      BaseUrl = storedBase!;
+    }
+    else if (!string.IsNullOrWhiteSpace(ServerIp))
+    {
+      BaseUrl = $"http://{ServerIp}";
+      await Storage.SetItemAsync(KeyBaseUrl, BaseUrl);
+    }
+
+    if (!string.IsNullOrWhiteSpace(BaseUrl))
+    {
+      Credentials.BaseUrl = BaseUrl;
+    }
+    StateHasChanged();
+  }
+
+  private async Task LoadSwagger()
+  {
+    Status = null; Body = null;
+    try
+    {
+      var (status, text) = await Api.GetTextAsync(Combine(Credentials.BaseUrl, SwaggerPath));
+      Status = status;
+      Body = text;
+    }
+    catch (Exception ex)
+    {
+      Status = $"Fehler: {ex.Message}";
+    }
+  }
+
+  private async Task TestPing()
+  {
+    Status = null; Body = null;
+    try
+    {
+      var (status, text) = await Api.GetTextAsync(Combine(Credentials.BaseUrl, TestPath));
+      Status = status;
+      Body = text;
+    }
+    catch (Exception ex)
+    {
+      Status = $"Fehler: {ex.Message}";
+    }
+  }
+
+  private static string Combine(string? baseUrl, string? relative)
+  {
+    baseUrl = (baseUrl ?? string.Empty).TrimEnd('/');
+    relative = string.IsNullOrWhiteSpace(relative) ? string.Empty : relative.TrimStart('/');
+    return string.IsNullOrWhiteSpace(baseUrl) ? $"/{relative}" : $"{baseUrl}/{relative}";
+  }
+
+  private async Task OnIpInput(ChangeEventArgs e)
+  {
+    ServerIp = e.Value?.ToString() ?? string.Empty;
+    await Storage.SetItemAsync(KeyServerIp, ServerIp);
+    if (!string.IsNullOrWhiteSpace(ServerIp) && (string.IsNullOrWhiteSpace(BaseUrl) || BaseUrl.StartsWith("http://") || BaseUrl.StartsWith("https://")))
+    {
+      BaseUrl = $"http://{ServerIp}";
+      await Storage.SetItemAsync(KeyBaseUrl, BaseUrl);
+      Credentials.BaseUrl = BaseUrl;
+      StateHasChanged();
+    }
+  }
+
+  private async Task OnBaseUrlInput(ChangeEventArgs e)
+  {
+    BaseUrl = e.Value?.ToString() ?? string.Empty;
+    await Storage.SetItemAsync(KeyBaseUrl, BaseUrl);
+    Credentials.BaseUrl = BaseUrl;
+  }
+}
