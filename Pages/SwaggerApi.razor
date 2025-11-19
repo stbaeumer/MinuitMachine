@@ -1,0 +1,215 @@
+@page "/swagger-api"
+@using MinuitMachine.Models
+@using MinuitMachine.Services
+@inject SwaggerApiService ApiService
+
+<PageTitle>Swagger API Interface</PageTitle>
+
+<div class="container-fluid">
+    <h1>Swagger API Interface</h1>
+    <p>Configure and test Swagger/OpenAPI endpoints</p>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>API Configuration</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="baseUrl" class="form-label">Base URL *</label>
+                        <input type="text" class="form-control" id="baseUrl" 
+                               @bind="_apiConfig.BaseUrl" 
+                               placeholder="https://api.example.com" />
+                        <small class="form-text text-muted">The base URL of your API</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="apiKey" class="form-label">API Key (Optional)</label>
+                        <input type="password" class="form-control" id="apiKey" 
+                               @bind="_apiConfig.ApiKey" 
+                               placeholder="Your API key" />
+                        <small class="form-text text-muted">Bearer token for authentication</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="swaggerUrl" class="form-label">Swagger/OpenAPI Document URL (Optional)</label>
+                        <input type="text" class="form-control" id="swaggerUrl" 
+                               @bind="_swaggerDocUrl" 
+                               placeholder="https://api.example.com/swagger.json" />
+                        <small class="form-text text-muted">URL to the Swagger/OpenAPI specification</small>
+                    </div>
+
+                    <button class="btn btn-primary" @onclick="LoadSwaggerDocument" disabled="@_isLoading">
+                        @if (_isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        }
+                        Load Swagger Document
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Endpoint Configuration</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="endpointPath" class="form-label">Endpoint Path *</label>
+                        <input type="text" class="form-control" id="endpointPath" 
+                               @bind="_endpoint.Path" 
+                               placeholder="/api/users" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="httpMethod" class="form-label">HTTP Method *</label>
+                        <select class="form-select" id="httpMethod" @bind="_endpoint.Method">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Parameters</label>
+                        @foreach (var param in _endpoint.Parameters)
+                        {
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control" @bind="param.Name" placeholder="Parameter name" />
+                                <input type="text" class="form-control" @bind="param.Value" placeholder="Value" />
+                                <button class="btn btn-outline-danger" type="button" @onclick="() => RemoveParameter(param)">
+                                    Remove
+                                </button>
+                            </div>
+                        }
+                        <button class="btn btn-sm btn-secondary" @onclick="AddParameter">Add Parameter</button>
+                    </div>
+
+                    <button class="btn btn-success" @onclick="ExecuteApiCall" disabled="@_isLoading">
+                        @if (_isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        }
+                        Execute API Call
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_responseMessage))
+    {
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>API Response</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert @(_responseSuccess ? "alert-success" : "alert-danger")" role="alert">
+                            <strong>Status:</strong> @_statusCode
+                        </div>
+                        <pre class="bg-light p-3 rounded"><code>@_responseMessage</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private ApiConfiguration _apiConfig = new();
+    private SwaggerEndpoint _endpoint = new() { Method = "GET" };
+    private string _swaggerDocUrl = string.Empty;
+    private string _responseMessage = string.Empty;
+    private bool _responseSuccess = false;
+    private int _statusCode = 0;
+    private bool _isLoading = false;
+
+    private async Task LoadSwaggerDocument()
+    {
+        if (string.IsNullOrWhiteSpace(_swaggerDocUrl))
+        {
+            _responseMessage = "Please enter a Swagger document URL";
+            _responseSuccess = false;
+            return;
+        }
+
+        _isLoading = true;
+        _responseMessage = string.Empty;
+
+        try
+        {
+            var response = await ApiService.FetchSwaggerDocumentAsync(_swaggerDocUrl);
+            _responseSuccess = response.Success;
+            _statusCode = response.StatusCode;
+
+            if (response.Success)
+            {
+                _responseMessage = response.Data ?? "No data received";
+            }
+            else
+            {
+                _responseMessage = response.ErrorMessage ?? "Unknown error occurred";
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task ExecuteApiCall()
+    {
+        if (string.IsNullOrWhiteSpace(_apiConfig.BaseUrl))
+        {
+            _responseMessage = "Please enter a base URL";
+            _responseSuccess = false;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_endpoint.Path))
+        {
+            _responseMessage = "Please enter an endpoint path";
+            _responseSuccess = false;
+            return;
+        }
+
+        _isLoading = true;
+        _responseMessage = string.Empty;
+
+        try
+        {
+            var response = await ApiService.ExecuteApiCallAsync(_apiConfig, _endpoint);
+            _responseSuccess = response.Success;
+            _statusCode = response.StatusCode;
+
+            if (response.Success)
+            {
+                _responseMessage = response.Data ?? "No data received";
+            }
+            else
+            {
+                _responseMessage = response.ErrorMessage ?? "Unknown error occurred";
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void AddParameter()
+    {
+        _endpoint.Parameters.Add(new EndpointParameter());
+    }
+
+    private void RemoveParameter(EndpointParameter param)
+    {
+        _endpoint.Parameters.Remove(param);
+    }
+}
