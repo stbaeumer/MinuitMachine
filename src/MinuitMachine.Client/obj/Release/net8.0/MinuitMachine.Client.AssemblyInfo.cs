@@ -12,9 +12,9 @@ using System;
 using System.Reflection;
 
 [assembly: System.Reflection.AssemblyCompanyAttribute("MinuitMachine.Client")]
-[assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
+[assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6f163d5c1bd34fd115289575f52961e6b2d8106a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d9d7678267c3670287606ac332218d47786e6b28")]
 [assembly: System.Reflection.AssemblyProductAttribute("MinuitMachine.Client")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MinuitMachine.Client")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
