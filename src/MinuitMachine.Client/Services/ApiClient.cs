@@ -5,12 +5,15 @@ namespace MinuitMachine.Client.Services;
 public class ApiClient
 {
     private readonly CredentialStore _credentials;
-    private readonly HttpClient _http = new();
+    private readonly HttpClient _http;
 
     public ApiClient(CredentialStore credentials)
     {
         _credentials = credentials;
-        _http.Timeout = TimeSpan.FromSeconds(30);
+        _http = new HttpClient
+        {
+            Timeout = TimeSpan.FromSeconds(30)
+        };
     }
 
     public async Task<(string status, string body)> GetTextAsync(string url)

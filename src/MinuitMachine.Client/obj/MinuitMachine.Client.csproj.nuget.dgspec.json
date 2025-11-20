@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/workspaces/MinuitMachine/src/MinuitMachine.Client/MinuitMachine.Client.csproj": {}
+    "/home/stefan/MinuitMachine/src/MinuitMachine.Client/MinuitMachine.Client.csproj": {}
   },
   "projects": {
-    "/workspaces/MinuitMachine/src/MinuitMachine.Client/MinuitMachine.Client.csproj": {
+    "/home/stefan/MinuitMachine/src/MinuitMachine.Client/MinuitMachine.Client.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/workspaces/MinuitMachine/src/MinuitMachine.Client/MinuitMachine.Client.csproj",
+        "projectUniqueName": "/home/stefan/MinuitMachine/src/MinuitMachine.Client/MinuitMachine.Client.csproj",
         "projectName": "MinuitMachine.Client",
-        "projectPath": "/workspaces/MinuitMachine/src/MinuitMachine.Client/MinuitMachine.Client.csproj",
-        "packagesPath": "/home/codespace/.nuget/packages/",
-        "outputPath": "/workspaces/MinuitMachine/src/MinuitMachine.Client/obj/",
+        "projectPath": "/home/stefan/MinuitMachine/src/MinuitMachine.Client/MinuitMachine.Client.csproj",
+        "packagesPath": "/home/stefan/.nuget/packages/",
+        "outputPath": "/home/stefan/MinuitMachine/src/MinuitMachine.Client/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/codespace/.nuget/NuGet/NuGet.Config"
+          "/home/stefan/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -32,11 +32,6 @@
           "warnAsError": [
             "NU1605"
           ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -61,7 +56,7 @@
             "Microsoft.NET.Sdk.WebAssembly.Pack": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.21, )",
+              "version": "[8.0.11, )",
               "autoReferenced": true
             },
             "NSwag.MSBuild": {
@@ -84,7 +79,7 @@
           "downloadDependencies": [
             {
               "name": "Microsoft.NETCore.App.Runtime.Mono.browser-wasm",
-              "version": "[8.0.21, 8.0.21]"
+              "version": "[8.0.11, 8.0.11]"
             }
           ],
           "frameworkReferences": {
@@ -92,7 +87,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.415/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/8.0.121/PortableRuntimeIdentifierGraph.json"
         }
       },
       "runtimes": {

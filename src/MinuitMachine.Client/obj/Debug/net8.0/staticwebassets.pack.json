@@ -1,19 +1,23 @@
 {
   "Files": [
     {
-      "Id": "/workspaces/MinuitMachine/src/MinuitMachine.Client/bin/Debug/net8.0/wwwroot/_framework/blazor.webassembly.js",
+      "Id": "/home/stefan/MinuitMachine/src/MinuitMachine.Client/bin/Debug/net8.0/wwwroot/_framework/blazor.webassembly.js",
       "PackagePath": "staticwebassets/_framework/blazor.webassembly.js"
     },
     {
-      "Id": "/workspaces/MinuitMachine/src/MinuitMachine.Client/obj/Debug/net8.0/compressed/f05v2qm72j.gz",
+      "Id": "/home/stefan/MinuitMachine/src/MinuitMachine.Client/obj/Debug/net8.0/compressed/01r8n2i3q3.gz",
       "PackagePath": "staticwebassets/_framework/blazor.webassembly.js.gz"
     },
     {
-      "Id": "/workspaces/MinuitMachine/src/MinuitMachine.Client/wwwroot/css/app.css",
+      "Id": "/home/stefan/MinuitMachine/src/MinuitMachine.Client/wwwroot/css/app.css",
       "PackagePath": "staticwebassets/css/app.css"
     },
     {
-      "Id": "/workspaces/MinuitMachine/src/MinuitMachine.Client/wwwroot/index.html",
+      "Id": "/home/stefan/MinuitMachine/src/MinuitMachine.Client/wwwroot/favicon.ico",
+      "PackagePath": "staticwebassets/favicon.ico"
+    },
+    {
+      "Id": "/home/stefan/MinuitMachine/src/MinuitMachine.Client/wwwroot/index.html",
       "PackagePath": "staticwebassets/index.html"
     },
     {

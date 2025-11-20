@@ -1,8 +1,8 @@
 :root {
-  --bg: #0b0f12;
-  --fg: #e5e7eb;
-  --muted: #9aa1a9;
-  --accent: #6aa9ff;
+  --bg: #ffffff;
+  --fg: #000000;
+  --muted: #666666;
+  --accent: #0066cc;
 }
 
 html, body {
@@ -17,8 +17,8 @@ body {
 a { color: var(--accent); text-decoration: none; }
 header, nav, main { padding: 1rem; }
 nav a { margin-right: 1rem; }
-input, button { padding: .5rem .75rem; border-radius: 6px; border: 1px solid #2a323a; background: #11161b; color: var(--fg); }
+input, button { padding: .5rem .75rem; border-radius: 6px; border: 1px solid #cccccc; background: #ffffff; color: var(--fg); }
 button { cursor: pointer; }
-button.primary { background: var(--accent); color: #081018; border-color: var(--accent); }
+button.primary { background: var(--accent); color: #ffffff; border-color: var(--accent); }
 label { display:block; margin-top:.5rem; font-size:.9rem; color: var(--muted); }
-pre { background: #0f1419; padding: 1rem; border-radius: 8px; overflow:auto; }
+pre { background: #f5f5f5; padding: 1rem; border-radius: 8px; overflow:auto; }

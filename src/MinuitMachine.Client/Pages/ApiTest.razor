@@ -13,16 +13,16 @@
   <input style="width:100%" value="@BaseUrl" @oninput="OnBaseUrlInput" placeholder="https://api.example.com" />
 
   <label>Benutzername</label>
-  <input style="width:100%" @bind-value="Credentials.Username" @bind-value:event="oninput" />
+  <input style="width:100%" value="@(Credentials?.Username ?? "")" @oninput="OnUsernameInput" />
 
   <label>Passwort</label>
-  <input style="width:100%" type="password" @bind-value="Credentials.Password" @bind-value:event="oninput" />
+  <input style="width:100%" type="password" value="@(Credentials?.Password ?? "")" @oninput="OnPasswordInput" />
 
   <label>Swagger JSON-Pfad</label>
-  <input style="width:100%" @bind-value="SwaggerPath" @bind-value:event="oninput" placeholder="/swagger/v1/swagger.json" />
+  <input style="width:100%" value="@SwaggerPath" @oninput="OnSwaggerPathInput" placeholder="/swagger/v1/swagger.json" />
 
   <label>Test-Endpunkt (relativer Pfad)</label>
-  <input style="width:100%" @bind-value="TestPath" @bind-value:event="oninput" placeholder="/api/health" />
+  <input style="width:100%" value="@TestPath" @oninput="OnTestPathInput" placeholder="/api/health" />
 
   <div style="margin-top:1rem; display:flex; gap:.5rem;">
     <button class="primary" @onclick="LoadSwagger">Swagger laden</button>
@@ -50,15 +50,19 @@
 
   private const string KeyServerIp = "serverIp";
   private const string KeyBaseUrl = "baseUrl";
+  private const string KeyUsername = "username";
+  private const string KeyPassword = "password";
+  private const string KeySwaggerPath = "swaggerPath";
+  private const string KeyTestPath = "testPath";
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
     if (!firstRender) return;
+    
     var storedIp = await Storage.GetItemAsync(KeyServerIp);
     if (!string.IsNullOrWhiteSpace(storedIp))
     {
       ServerIp = storedIp!;
-      StateHasChanged();
     }
 
     var storedBase = await Storage.GetItemAsync(KeyBaseUrl);
@@ -72,16 +76,42 @@
       await Storage.SetItemAsync(KeyBaseUrl, BaseUrl);
     }
 
-    if (!string.IsNullOrWhiteSpace(BaseUrl))
+    if (!string.IsNullOrWhiteSpace(BaseUrl) && Credentials != null)
     {
       Credentials.BaseUrl = BaseUrl;
     }
+
+    var storedUsername = await Storage.GetItemAsync(KeyUsername);
+    if (!string.IsNullOrWhiteSpace(storedUsername) && Credentials != null)
+    {
+      Credentials.Username = storedUsername!;
+    }
+
+    var storedPassword = await Storage.GetItemAsync(KeyPassword);
+    if (!string.IsNullOrWhiteSpace(storedPassword) && Credentials != null)
+    {
+      Credentials.Password = storedPassword!;
+    }
+
+    var storedSwaggerPath = await Storage.GetItemAsync(KeySwaggerPath);
+    if (!string.IsNullOrWhiteSpace(storedSwaggerPath))
+    {
+      SwaggerPath = storedSwaggerPath!;
+    }
+
+    var storedTestPath = await Storage.GetItemAsync(KeyTestPath);
+    if (!string.IsNullOrWhiteSpace(storedTestPath))
+    {
+      TestPath = storedTestPath!;
+    }
+
     StateHasChanged();
   }
 
   private async Task LoadSwagger()
   {
     Status = null; Body = null;
+    if (Credentials == null) return;
     try
     {
       var (status, text) = await Api.GetTextAsync(Combine(Credentials.BaseUrl, SwaggerPath));
@@ -97,11 +127,21 @@
   private async Task TestPing()
   {
     Status = null; Body = null;
+    if (Credentials == null) return;
     try
     {
       var (status, text) = await Api.GetTextAsync(Combine(Credentials.BaseUrl, TestPath));
       Status = status;
       Body = text;
+        // Wenn erfolgreich, Logo abrufen und speichern
+        if (status.StartsWith("200"))
+        {
+          var (logoStatus, logoBase64) = await Api.GetTextAsync(Combine(Credentials.BaseUrl, "/db/svwsdb/schule/logo"));
+          if (logoStatus.StartsWith("200") && !string.IsNullOrWhiteSpace(logoBase64))
+          {
+            await Storage.SetItemAsync("schullogo", logoBase64.Trim('"'));
+          }
+        }
     }
     catch (Exception ex)
     {
@@ -124,7 +164,10 @@
     {
       BaseUrl = $"http://{ServerIp}";
       await Storage.SetItemAsync(KeyBaseUrl, BaseUrl);
-      Credentials.BaseUrl = BaseUrl;
+      if (Credentials != null)
+      {
+        Credentials.BaseUrl = BaseUrl;
+      }
       StateHasChanged();
     }
   }
@@ -133,6 +176,35 @@
   {
     BaseUrl = e.Value?.ToString() ?? string.Empty;
     await Storage.SetItemAsync(KeyBaseUrl, BaseUrl);
-    Credentials.BaseUrl = BaseUrl;
+    if (Credentials != null)
+    {
+      Credentials.BaseUrl = BaseUrl;
+    }
+  }
+
+  private async Task OnUsernameInput(ChangeEventArgs e)
+  {
+    if (Credentials == null) return;
+    Credentials.Username = e.Value?.ToString() ?? string.Empty;
+    await Storage.SetItemAsync(KeyUsername, Credentials.Username);
+  }
+
+  private async Task OnPasswordInput(ChangeEventArgs e)
+  {
+    if (Credentials == null) return;
+    Credentials.Password = e.Value?.ToString() ?? string.Empty;
+    await Storage.SetItemAsync(KeyPassword, Credentials.Password);
+  }
+
+  private async Task OnSwaggerPathInput(ChangeEventArgs e)
+  {
+    SwaggerPath = e.Value?.ToString() ?? string.Empty;
+    await Storage.SetItemAsync(KeySwaggerPath, SwaggerPath);
+  }
+
+  private async Task OnTestPathInput(ChangeEventArgs e)
+  {
+    TestPath = e.Value?.ToString() ?? string.Empty;
+    await Storage.SetItemAsync(KeyTestPath, TestPath);
   }
 }

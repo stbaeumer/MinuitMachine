@@ -2,30 +2,24 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch MinuitMachine.Client (Blazor WASM)",
-      "type": "blazorwasm",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/src/MinuitMachine.Client",
-      "browser": "chrome",
-      "trace": false
-    },
-    {
-      "name": "Run MinuitMachine.Client (dotnet run)",
+      "name": "Launch Blazor WebAssembly App",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build MinuitMachine.Client",
-      "program": "/usr/bin/dotnet",
+      "program": "dotnet",
       "args": [
+        "watch",
         "run",
         "--project",
-        "${workspaceFolder}/src/MinuitMachine.Client"
+        "${workspaceFolder}/src/MinuitMachine.Client",
+        "--non-interactive"
       ],
-      "cwd": "${workspaceFolder}",
+      "cwd": "${workspaceFolder}/src/MinuitMachine.Client",
       "stopAtEntry": false,
-      "console": "integratedTerminal",
       "serverReadyAction": {
         "action": "openExternally",
-        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s"
       }
     }
   ]

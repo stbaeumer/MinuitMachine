@@ -1,14 +1,36 @@
 @inherits LayoutComponentBase
+@inject LocalStorageService Storage
 
 <header>
-  <h1>MinuitMachine Client</h1>
+  <h1>Minuit Machine</h1>
   <nav>
     <a href="/">Home</a>
     <a href="/apitest">API-Test</a>
   </nav>
   <hr />
+  <div style="position:absolute;top:1rem;right:1rem;">
+    @if (!string.IsNullOrEmpty(SchullogoBase64))
+    {
+      <img src="@SchullogoBase64" alt="Schullogo" style="max-height:48px;max-width:120px;border-radius:4px;box-shadow:0 0 4px #888;" />
+    }
+  </div>
 </header>
 
 <main>
   @Body
 </main>
+
+@code {
+  private string? SchullogoBase64;
+  private const string KeySchullogo = "schullogo";
+
+  protected override async Task OnInitializedAsync()
+  {
+    var logo = await Storage.GetItemAsync(KeySchullogo);
+    if (!string.IsNullOrWhiteSpace(logo))
+    {
+      var trimmedLogo = logo.Replace("\"", "");
+      SchullogoBase64 = "data:image/jpeg;base64," + trimmedLogo;
+    }
+  }
+}
