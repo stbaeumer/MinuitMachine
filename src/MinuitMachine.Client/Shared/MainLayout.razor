@@ -1,13 +1,17 @@
 @inherits LayoutComponentBase
 @inject LocalStorageService Storage
+@inject ApiClient Api
+@inject CredentialStore Credentials
 
-<header>
-  <h1>Minuit Machine</h1>
+<header class="app-header">
+  <div style="display:flex;align-items:center;justify-content:center;gap:1rem;">
+    <img src="minuitmachine.png" alt="Logo" style="height:2.5rem;" />
+    <h1>Minuit Machine</h1>
+  </div>
   <nav>
-    <a href="/">Home</a>
-    <a href="/apitest">API-Test</a>
+    <a href="/" title="Home">🏠</a>
+    <a href="/apitest">Verbindung herstellen</a>
   </nav>
-  <hr />
   <div style="position:absolute;top:1rem;right:1rem;">
     @if (!string.IsNullOrEmpty(SchullogoBase64))
     {
@@ -16,12 +20,21 @@
   </div>
 </header>
 
+<div class="status-bar">
+  <span>Schüler: @SchuelerAnzahl</span>
+</div>
+
 <main>
   @Body
 </main>
 
+<footer class="app-footer">
+  <p>&copy; @DateTime.Now.Year Stefan Bäumer</p>
+</footer>
+
 @code {
   private string? SchullogoBase64;
+  private string SchuelerAnzahl = "-";
   private const string KeySchullogo = "schullogo";
 
   protected override async Task OnInitializedAsync()
@@ -31,6 +44,64 @@
     {
       var trimmedLogo = logo.Replace("\"", "");
       SchullogoBase64 = "data:image/jpeg;base64," + trimmedLogo;
+    }
+    
+    // Lade Credentials aus LocalStorage
+    if (Credentials != null)
+    {
+      var storedBase = await Storage.GetItemAsync("baseUrl");
+      if (!string.IsNullOrWhiteSpace(storedBase))
+      {
+        Credentials.BaseUrl = storedBase!;
+      }
+
+      var storedUsername = await Storage.GetItemAsync("username");
+      if (!string.IsNullOrWhiteSpace(storedUsername))
+      {
+        Credentials.Username = storedUsername!;
+      }
+
+      var storedPassword = await Storage.GetItemAsync("password");
+      if (!string.IsNullOrWhiteSpace(storedPassword))
+      {
+        Credentials.Password = storedPassword!;
+      }
+      
+      // Jetzt erst Schüleranzahl laden, nachdem Credentials gesetzt sind
+      await LoadSchuelerAnzahl();
+    }
+  }
+
+  private async Task LoadSchuelerAnzahl()
+  {
+    try
+    {
+      if (Credentials == null || string.IsNullOrWhiteSpace(Credentials.BaseUrl))
+      {
+        SchuelerAnzahl = "Keine Verbindung";
+        return;
+      }
+      
+      // Aktuellen Abschnitt ermitteln (verwenden wir erstmal 0 für aktuell)
+      var url = $"{Credentials.BaseUrl}/db/svwsdb/schueler/abschnitt/0/auswahlliste";
+      var (status, jsonText) = await Api.GetTextAsync(url);
+      
+      if (status.StartsWith("200") && !string.IsNullOrWhiteSpace(jsonText))
+      {
+        // JSON parsen - es ist ein Array, zähle die "id"-Vorkommen
+        var pattern = "\"id\"";
+        var count = (jsonText.Length - jsonText.Replace(pattern, "").Length) / pattern.Length;
+        SchuelerAnzahl = count.ToString();
+        StateHasChanged();
+      }
+      else
+      {
+        SchuelerAnzahl = $"Fehler {status}";
+      }
+    }
+    catch (Exception ex)
+    {
+      SchuelerAnzahl = $"Fehler: {ex.Message}";
     }
   }
 }

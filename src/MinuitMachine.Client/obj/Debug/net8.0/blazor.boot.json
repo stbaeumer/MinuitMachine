@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "MinuitMachine.Client",
   "resources": {
-    "hash": "sha256-8RB/sJ3VPxHgzQNrbgj7Gi0FRBl05cB0cU+BzDtGxPU=",
+    "hash": "sha256-W81JYJr6ee/sjPjuxL0mS8qt0dwcWEoBVyN5ruGmsqU=",
     "jsModuleNative": {
       "dotnet.native.8.0.11.gv55marsrc.js": "sha256-VdKq87/z5NIxZKmuM+fv38XF+RcEb/bg3jVBwQSfwP4="
     },
@@ -208,10 +208,10 @@
       "mscorlib.wasm": "sha256-MZJ1V6miMP318lQowft4FPkcszcibPLDTwKj235fSAc=",
       "netstandard.wasm": "sha256-RYAURbR1AHkUZYjKgu+B/i3N3VP4abnAaH+vxwJ8d3c=",
       "System.Private.CoreLib.wasm": "sha256-4YzdATaWUDkUkRpe+hl+T61TaCjRVapVUtqTIai3Gd8=",
-      "MinuitMachine.Client.wasm": "sha256-dG5T6a464SsKP3DDGWKl8PHxM2FJ+e1pv+cZ7rimWu0="
+      "MinuitMachine.Client.wasm": "sha256-9U39wNDKhe3LOOO0Mro3gWdbfxiWK+scE5puz+z67Ss="
     },
     "pdb": {
-      "MinuitMachine.Client.pdb": "sha256-KxFSvmyv1GKZrLCpYrVfwlQMmhj8ooZ0a8NcowBvWhA="
+      "MinuitMachine.Client.pdb": "sha256-2+yWn33/ljw8CHZQwVWEZeintF9IeLVD3nyUO6aa1WE="
     }
   },
   "cacheBootResources": true,

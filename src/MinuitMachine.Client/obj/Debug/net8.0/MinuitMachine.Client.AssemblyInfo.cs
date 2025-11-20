@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MinuitMachine.Client")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cc4111a289df217b6ea73478c492fb83b7409bb5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c9ee96f2ab8c0c8963ff83718815d5ae1a068608")]
 [assembly: System.Reflection.AssemblyProductAttribute("MinuitMachine.Client")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MinuitMachine.Client")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

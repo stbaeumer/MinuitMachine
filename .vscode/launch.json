@@ -16,6 +16,9 @@
       ],
       "cwd": "${workspaceFolder}/src/MinuitMachine.Client",
       "stopAtEntry": false,
+      "env": {
+        "BROWSER": "google-chrome"
+      },
       "serverReadyAction": {
         "action": "openExternally",
         "pattern": "\\bNow listening on:\\s+(https?://\\S+)",

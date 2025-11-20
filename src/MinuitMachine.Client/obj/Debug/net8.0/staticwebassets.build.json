@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "PR/3Skm8655UgHZ3g6TSZbnCh+umxuSYxYidmBk5NkY=",
+  "Hash": "9ZyHAjYt5YKaVce9PGZx9IuS8bHkZM+Xzmv/wOqZCNs=",
   "Source": "MinuitMachine.Client",
   "BasePath": "/",
   "Mode": "Root",
@@ -7824,6 +7824,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/index.html"
+    },
+    {
+      "Identity": "/home/stefan/MinuitMachine/src/MinuitMachine.Client/wwwroot/minuitmachine.png",
+      "SourceId": "MinuitMachine.Client",
+      "SourceType": "Discovered",
+      "ContentRoot": "/home/stefan/MinuitMachine/src/MinuitMachine.Client/wwwroot/",
+      "BasePath": "/",
+      "RelativePath": "minuitmachine.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/minuitmachine.png"
     }
   ]
 }

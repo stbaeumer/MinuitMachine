@@ -21,6 +21,10 @@
       "PackagePath": "staticwebassets/index.html"
     },
     {
+      "Id": "/home/stefan/MinuitMachine/src/MinuitMachine.Client/wwwroot/minuitmachine.png",
+      "PackagePath": "staticwebassets/minuitmachine.png"
+    },
+    {
       "Id": "obj/Debug/net8.0/staticwebassets/msbuild.MinuitMachine.Client.Microsoft.AspNetCore.StaticWebAssets.props",
       "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
     },

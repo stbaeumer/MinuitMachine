@@ -17,6 +17,44 @@ body {
 a { color: var(--accent); text-decoration: none; }
 header, nav, main { padding: 1rem; }
 nav a { margin-right: 1rem; }
+
+.app-header {
+  background: #f0f0f0;
+  border-bottom: 2px solid #cccccc;
+  margin: -1rem -1rem 1rem -1rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.app-header h1 {
+  margin: 0;
+}
+
+.app-header nav {
+  margin-top: 0.5rem;
+}
+
+.app-footer {
+  background: #f0f0f0;
+  border-top: 2px solid #cccccc;
+  text-align: center;
+  padding: 1rem;
+  margin: 2rem -1rem -1rem -1rem;
+}
+
+.app-footer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.status-bar {
+  background: #ff9933;
+  color: #000000;
+  padding: 0.5rem 1rem;
+  margin: -1rem -1rem 1rem -1rem;
+  font-weight: bold;
+}
 input, button { padding: .5rem .75rem; border-radius: 6px; border: 1px solid #cccccc; background: #ffffff; color: var(--fg); }
 button { cursor: pointer; }
 button.primary { background: var(--accent); color: #ffffff; border-color: var(--accent); }
