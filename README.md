@@ -21,3 +21,5 @@ Dann im Browser `http://localhost:5179` öffnen. Unter "API-Test" können Basis-
 - NSwag-Codegenerierung kann ergänzt werden, sobald eine konkrete Swagger-URL vorliegt.
 
 Weitere Details für KI-Agenten: `.github/copilot-instructions.md`.
+
+Stefan Bäumer 2025
