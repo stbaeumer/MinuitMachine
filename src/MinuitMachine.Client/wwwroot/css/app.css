@@ -49,12 +49,21 @@ nav a { margin-right: 1rem; }
 }
 
 .status-bar {
-  background: #ff9933;
-  color: #000000;
   padding: 0.5rem 1rem;
   margin: -1rem -1rem 1rem -1rem;
   font-weight: bold;
 }
+
+.status-bar.connected {
+  background: #28a745; /* green */
+  color: #ffffff;
+}
+
+.status-bar.disconnected {
+  background: #c82333; /* red */
+  color: #ffffff;
+}
+
 input, button { padding: .5rem .75rem; border-radius: 6px; border: 1px solid #cccccc; background: #ffffff; color: var(--fg); }
 button { cursor: pointer; }
 button.primary { background: var(--accent); color: #ffffff; border-color: var(--accent); }

@@ -1,0 +1,4 @@
+wwwroot\css\app.css
+wwwroot\favicon.ico
+wwwroot\index.html
+wwwroot\minuitmachine.png

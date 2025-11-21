@@ -3,6 +3,9 @@
 @inject ApiClient Api
 @inject LocalStorageService Storage
 @inject NavigationManager Navigation
+@inject AppState AppState
+@inject Microsoft.JSInterop.IJSRuntime JS
+@using System.Text.RegularExpressions
 
 <h2>Verbindung herstellen</h2>
 
@@ -24,6 +27,9 @@
 
   <label>Test-Endpunkt (relativer Pfad)</label>
   <input style="width:100%" value="@TestPath" @oninput="OnTestPathInput" placeholder="/db/svwsdb/schule/logo" />
+
+  <label>Schema (z.B. svwsdb)</label>
+  <input style="width:100%" value="@Schema" @oninput="OnSchemaInput" placeholder="svwsdb" />
 
   <div style="margin-top:1rem; display:flex; gap:.5rem; align-items:center;">
     <button class="primary" @onclick="TestPing">Speichern und Verbindung testen</button>
@@ -50,6 +56,7 @@
   
   private string SwaggerPath = "/openapi/server.json";
   private string TestPath = "/db/svwsdb/schule/logo";
+  private string Schema = "svwsdb";
   private ConnectionResult ConnectionStatus = ConnectionResult.None;
   private string? ErrorMessage;
   private string ServerIp = "localhost:8443";
@@ -61,6 +68,7 @@
   private const string KeyPassword = "password";
   private const string KeySwaggerPath = "swaggerPath";
   private const string KeyTestPath = "testPath";
+  private const string KeySchema = "schema";
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
@@ -111,6 +119,12 @@
       TestPath = storedTestPath!;
     }
 
+    var storedSchema = await Storage.GetItemAsync(KeySchema);
+    if (!string.IsNullOrWhiteSpace(storedSchema))
+    {
+      Schema = storedSchema!;
+    }
+
     StateHasChanged();
   }
 
@@ -127,32 +141,80 @@
     
     try
     {
-      var (status, text) = await Api.GetTextAsync(Combine(Credentials.BaseUrl, TestPath));
+      // If user entered a placeholder token like {schema} or accidentally encoded %7B...%7D, replace any {...} with the configured Schema
+      var effectiveTestPath = TestPath ?? string.Empty;
+
+      // If the user or browser encoded braces, decode percent-encoded braces first
+      if (effectiveTestPath.Contains("%7B", StringComparison.OrdinalIgnoreCase) || effectiveTestPath.Contains("%7D", StringComparison.OrdinalIgnoreCase))
+      {
+        effectiveTestPath = effectiveTestPath.Replace("%7B", "{", StringComparison.OrdinalIgnoreCase).Replace("%7D", "}", StringComparison.OrdinalIgnoreCase);
+      }
+
+      // Also unescape other encodings just in case (won't change already-correct paths)
+      try
+      {
+        var unescaped = Uri.UnescapeDataString(effectiveTestPath);
+        if (!string.IsNullOrEmpty(unescaped)) effectiveTestPath = unescaped;
+      }
+      catch { /* ignore */ }
+
+      if (effectiveTestPath.Contains('{'))
+      {
+        effectiveTestPath = Regex.Replace(effectiveTestPath, "\\{[^}]*\\}", Schema);
+      }
+
+      var finalUrl = Combine(Credentials.BaseUrl, effectiveTestPath);
+      await JS.InvokeAsync<object>("console.log", new object[] { "ApiTest: calling URL:", finalUrl, "effectiveTestPath:", effectiveTestPath });
+
+      var (status, text) = await Api.GetTextAsync(finalUrl);
       
       if (status.StartsWith("200"))
       {
         ConnectionStatus = ConnectionResult.Success;
-        // Logo abrufen und speichern
-        var (logoStatus, logoBase64) = await Api.GetTextAsync(Combine(Credentials.BaseUrl, "/db/svwsdb/schule/logo"));
+        // Logo abrufen and save to storage if available
+        // compute logo path using schema placeholder
+        var logoPathTemplate = "/db/{schema}/schule/logo";
+        var logoPath = logoPathTemplate;
+        if (logoPath.Contains('{'))
+        {
+          logoPath = Regex.Replace(logoPath, "\\{[^}]*\\}", Schema);
+        }
+        var finalLogoUrl = Combine(Credentials.BaseUrl, logoPath);
+        await JS.InvokeAsync<object>("console.log", new object[] { "ApiTest: logo URL:", finalLogoUrl });
+        var (logoStatus, logoBase64) = await Api.GetTextAsync(finalLogoUrl);
         if (logoStatus.StartsWith("200") && !string.IsNullOrWhiteSpace(logoBase64))
         {
           await Storage.SetItemAsync("schullogo", logoBase64.Trim('"'));
         }
+
+        // Persist connected flag and notify global state so layout can update
+        await Storage.SetItemAsync("connected", "true");
+        await JS.InvokeAsync<object>("console.log", new object[] { "ApiTest: notifying connected=true" });
+        AppState.NotifyConnectionChanged(true);
       }
       else if (status.StartsWith("401"))
       {
         ConnectionStatus = ConnectionResult.Failed;
         ErrorMessage = "Fehler: Anmeldung fehlgeschlagen. Bitte prüfen Sie Benutzername und Passwort.";
+        await Storage.SetItemAsync("connected", "false");
+        await JS.InvokeAsync<object>("console.log", new object[] { "ApiTest: notifying connected=false (401)" });
+        AppState.NotifyConnectionChanged(false);
       }
       else if (status.StartsWith("404"))
       {
         ConnectionStatus = ConnectionResult.Failed;
         ErrorMessage = "Fehler: Server-Endpunkt nicht gefunden. Bitte prüfen Sie die API Basis-URL.";
+        await Storage.SetItemAsync("connected", "false");
+        await JS.InvokeAsync<object>("console.log", new object[] { "ApiTest: notifying connected=false (404)" });
+        AppState.NotifyConnectionChanged(false);
       }
       else
       {
         ConnectionStatus = ConnectionResult.Failed;
         ErrorMessage = $"Fehler: Server antwortete mit Status {status}.";
+        await Storage.SetItemAsync("connected", "false");
+        await JS.InvokeAsync<object>("console.log", new object[] { "ApiTest: notifying connected=false (other)" });
+        AppState.NotifyConnectionChanged(false);
       }
     }
     catch (Exception ex)
@@ -166,6 +228,9 @@
       {
         ErrorMessage = $"Fehler: {ex.Message}";
       }
+      await Storage.SetItemAsync("connected", "false");
+      await JS.InvokeAsync<object>("console.log", new object[] { "ApiTest: notifying connected=false (exception) - " + ex.Message });
+      AppState.NotifyConnectionChanged(false);
     }
   }
 
@@ -231,5 +296,11 @@
   {
     TestPath = e.Value?.ToString() ?? string.Empty;
     await Storage.SetItemAsync(KeyTestPath, TestPath);
+  }
+
+  private async Task OnSchemaInput(ChangeEventArgs e)
+  {
+    Schema = e.Value?.ToString() ?? string.Empty;
+    await Storage.SetItemAsync(KeySchema, Schema);
   }
 }

@@ -2,6 +2,8 @@
 @inject LocalStorageService Storage
 @inject ApiClient Api
 @inject CredentialStore Credentials
+@inject AppState AppState
+@using System.Text.Json
 
 <header class="app-header">
   <div style="display:flex;align-items:center;justify-content:center;gap:1rem;">
@@ -10,7 +12,7 @@
   </div>
   <nav>
     <a href="/" title="Home">🏠</a>
-    <a href="/apitest">Verbindung herstellen</a>
+    <a href="/apitest" title="Verbindung herstellen" aria-label="Verbindung herstellen">🔐</a>
   </nav>
   <div style="position:absolute;top:1rem;right:1rem;">
     @if (!string.IsNullOrEmpty(SchullogoBase64))
@@ -20,8 +22,15 @@
   </div>
 </header>
 
-<div class="status-bar">
-  <span>Schüler: @SchuelerAnzahl</span>
+<div class="status-bar @(IsConnected ? "connected" : "disconnected")">
+  @if (IsConnected)
+  {
+    <span>Schüler: @SchuelerAnzahl</span>
+  }
+  else
+  {
+    <span>keine Verbindung</span>
+  }
 </div>
 
 <main>
@@ -29,16 +38,22 @@
 </main>
 
 <footer class="app-footer">
-  <p>&copy; @DateTime.Now.Year Stefan Bäumer</p>
+  <p>&copy; @DateTime.Now.Year Stefan Bäumer (<a href="mailto:stefan.baeumer@berufskolleg-borken.de">stefan.baeumer@berufskolleg-borken.de</a>)</p>
 </footer>
 
 @code {
   private string? SchullogoBase64;
   private string SchuelerAnzahl = "-";
   private const string KeySchullogo = "schullogo";
+  private bool IsConnected = false;
 
   protected override async Task OnInitializedAsync()
   {
+    if (AppState != null)
+    {
+      AppState.ConnectionChanged += OnAppStateConnectionChanged;
+    }
+
     var logo = await Storage.GetItemAsync(KeySchullogo);
     if (!string.IsNullOrWhiteSpace(logo))
     {
@@ -66,42 +81,183 @@
       {
         Credentials.Password = storedPassword!;
       }
-      
+
+      // Read connected flag persisted by ApiTest and apply it first to avoid flicker
+      var storedConnected = await Storage.GetItemAsync("connected");
+      if (!string.IsNullOrWhiteSpace(storedConnected) && storedConnected == "true")
+      {
+        IsConnected = true;
+      }
+
       // Jetzt erst Schüleranzahl laden, nachdem Credentials gesetzt sind
-      await LoadSchuelerAnzahl();
+      await LoadSchuelerAnzahl(updateConnectionFlag: false);
+    }
+
+    // Ensure initial status reflects load result
+    StateHasChanged();
+  }
+
+  private async void OnAppStateConnectionChanged(bool connected)
+  {
+    // Update connection state immediately so UI reflects it
+    IsConnected = connected;
+    if (!connected)
+    {
+      SchuelerAnzahl = "Keine Verbindung";
+      StateHasChanged();
+      return;
+    }
+
+    // show interim state while loading count
+    SchuelerAnzahl = "...";
+    StateHasChanged();
+
+    // Re-load saved baseUrl/credentials and then reload Schüleranzahl und logo
+    var storedBase = await Storage.GetItemAsync("baseUrl");
+    if (!string.IsNullOrWhiteSpace(storedBase) && Credentials != null)
+    {
+      Credentials.BaseUrl = storedBase!;
+    }
+
+    var storedUsername = await Storage.GetItemAsync("username");
+    if (!string.IsNullOrWhiteSpace(storedUsername) && Credentials != null)
+    {
+      Credentials.Username = storedUsername!;
+    }
+
+    var storedPassword = await Storage.GetItemAsync("password");
+    if (!string.IsNullOrWhiteSpace(storedPassword) && Credentials != null)
+    {
+      Credentials.Password = storedPassword!;
+    }
+
+    // Update logo from storage
+    var logo = await Storage.GetItemAsync(KeySchullogo);
+    if (!string.IsNullOrWhiteSpace(logo))
+    {
+      var trimmedLogo = logo.Replace("\"", "");
+      SchullogoBase64 = "data:image/jpeg;base64," + trimmedLogo;
+    }
+
+    // Reload Schüleranzahl
+    // Do not overwrite IsConnected=false on failure when the app already reports connected true
+    await LoadSchuelerAnzahl(updateConnectionFlag: false);
+
+    StateHasChanged();
+  }
+
+  public void Dispose()
+  {
+    if (AppState != null)
+    {
+      AppState.ConnectionChanged -= OnAppStateConnectionChanged;
     }
   }
 
-  private async Task LoadSchuelerAnzahl()
+  private async Task LoadSchuelerAnzahl(bool updateConnectionFlag = true)
   {
     try
     {
       if (Credentials == null || string.IsNullOrWhiteSpace(Credentials.BaseUrl))
       {
         SchuelerAnzahl = "Keine Verbindung";
+        if (updateConnectionFlag) IsConnected = false;
         return;
       }
       
-      // Aktuellen Abschnitt ermitteln (verwenden wir erstmal 0 für aktuell)
-      var url = $"{Credentials.BaseUrl}/db/svwsdb/schueler/abschnitt/0/auswahlliste";
+      // Use configurable test path if set in LocalStorage, otherwise fallback to default
+      var storedTestPath = await Storage.GetItemAsync("testPath");
+      var testPath = string.IsNullOrWhiteSpace(storedTestPath) ? "/db/svwsdb/schule/logo" : storedTestPath!;
+
+      // If a schema is stored, replace any placeholder {..} or percent-encoded braces with the schema
+      var storedSchema = await Storage.GetItemAsync("schema");
+      var schema = string.IsNullOrWhiteSpace(storedSchema) ? "svwsdb" : storedSchema!;
+      // decode percent-encoded braces if present
+      if (testPath.Contains("%7B", StringComparison.OrdinalIgnoreCase) || testPath.Contains("%7D", StringComparison.OrdinalIgnoreCase))
+      {
+        testPath = testPath.Replace("%7B", "{", StringComparison.OrdinalIgnoreCase).Replace("%7D", "}", StringComparison.OrdinalIgnoreCase);
+      }
+      try
+      {
+        var unescaped = Uri.UnescapeDataString(testPath);
+        if (!string.IsNullOrEmpty(unescaped)) testPath = unescaped;
+      }
+      catch { }
+
+      if (testPath.Contains('{'))
+      {
+        testPath = System.Text.RegularExpressions.Regex.Replace(testPath, "\\{[^}]*\\}", schema);
+      }
+
+      var url = Combine(Credentials.BaseUrl, testPath);
       var (status, jsonText) = await Api.GetTextAsync(url);
       
       if (status.StartsWith("200") && !string.IsNullOrWhiteSpace(jsonText))
       {
-        // JSON parsen - es ist ein Array, zähle die "id"-Vorkommen
-        var pattern = "\"id\"";
-        var count = (jsonText.Length - jsonText.Replace(pattern, "").Length) / pattern.Length;
-        SchuelerAnzahl = count.ToString();
-        StateHasChanged();
+        // Try to parse JSON; if it's an array we count "id" occurrences, otherwise treat it as a logo (base64)
+        try
+        {
+          using var doc = JsonDocument.Parse(jsonText);
+          if (doc.RootElement.ValueKind == JsonValueKind.Array)
+          {
+            // JSON array -> count elements where property "status" == 2
+            int count = 0;
+            foreach (var el in doc.RootElement.EnumerateArray())
+            {
+              if (el.ValueKind == JsonValueKind.Object && el.TryGetProperty("status", out var statusProp))
+              {
+                if (statusProp.ValueKind == JsonValueKind.Number && statusProp.TryGetInt32(out var sInt))
+                {
+                  if (sInt == 2) count++;
+                }
+                else if (statusProp.ValueKind == JsonValueKind.String)
+                {
+                  if (int.TryParse(statusProp.GetString(), out var sParsed) && sParsed == 2) count++;
+                }
+              }
+            }
+            SchuelerAnzahl = count.ToString();
+          }
+          else
+          {
+            // Not an array -> treat as logo/base64
+            var trimmed = jsonText.Replace("\"", "");
+            SchullogoBase64 = "data:image/jpeg;base64," + trimmed;
+            await Storage.SetItemAsync(KeySchullogo, trimmed);
+            SchuelerAnzahl = "-";
+          }
+
+          if (updateConnectionFlag) IsConnected = true;
+          StateHasChanged();
+        }
+        catch (JsonException)
+        {
+          // Not JSON -> assume logo/base64
+          var trimmed = jsonText.Replace("\"", "");
+          SchullogoBase64 = "data:image/jpeg;base64," + trimmed;
+          await Storage.SetItemAsync(KeySchullogo, trimmed);
+          SchuelerAnzahl = "-";
+          if (updateConnectionFlag) IsConnected = true;
+          StateHasChanged();
+        }
       }
       else
       {
         SchuelerAnzahl = $"Fehler {status}";
+        if (updateConnectionFlag) IsConnected = false;
       }
     }
     catch (Exception ex)
     {
       SchuelerAnzahl = $"Fehler: {ex.Message}";
+      if (updateConnectionFlag) IsConnected = false;
     }
+  }
+
+  private static string Combine(string? baseUrl, string? relative)
+  {
+    baseUrl = (baseUrl ?? string.Empty).TrimEnd('/');
+    relative = string.IsNullOrWhiteSpace(relative) ? string.Empty : relative.TrimStart('/');
+    return string.IsNullOrWhiteSpace(baseUrl) ? $"/{relative}" : $"{baseUrl}/{relative}";
   }
 }

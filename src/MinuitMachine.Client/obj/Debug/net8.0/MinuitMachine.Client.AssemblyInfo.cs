@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MinuitMachine.Client")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c0089b1a803b56167673c167d11419cbe7c35392")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+db3141e68d51d0e3453c2a425cb71a78499d6825")]
 [assembly: System.Reflection.AssemblyProductAttribute("MinuitMachine.Client")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MinuitMachine.Client")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

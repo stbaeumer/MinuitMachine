@@ -10,5 +10,6 @@ builder.RootComponents.Add<App>("#app");
 builder.Services.AddScoped<CredentialStore>();
 builder.Services.AddScoped<ApiClient>();
 builder.Services.AddScoped<LocalStorageService>();
+builder.Services.AddScoped<AppState>();
 
 await builder.Build().RunAsync();

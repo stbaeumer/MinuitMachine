@@ -1,25 +1,31 @@
 {
   "format": 1,
   "restore": {
-    "/home/stefan/MinuitMachine/src/MinuitMachine.Client/MinuitMachine.Client.csproj": {}
+    "C:\\Users\\bm\\source\\repos\\stbaeumer\\MinuitMachine\\src\\MinuitMachine.Client\\MinuitMachine.Client.csproj": {}
   },
   "projects": {
-    "/home/stefan/MinuitMachine/src/MinuitMachine.Client/MinuitMachine.Client.csproj": {
+    "C:\\Users\\bm\\source\\repos\\stbaeumer\\MinuitMachine\\src\\MinuitMachine.Client\\MinuitMachine.Client.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/stefan/MinuitMachine/src/MinuitMachine.Client/MinuitMachine.Client.csproj",
+        "projectUniqueName": "C:\\Users\\bm\\source\\repos\\stbaeumer\\MinuitMachine\\src\\MinuitMachine.Client\\MinuitMachine.Client.csproj",
         "projectName": "MinuitMachine.Client",
-        "projectPath": "/home/stefan/MinuitMachine/src/MinuitMachine.Client/MinuitMachine.Client.csproj",
-        "packagesPath": "/home/stefan/.nuget/packages/",
-        "outputPath": "/home/stefan/MinuitMachine/src/MinuitMachine.Client/obj/",
+        "projectPath": "C:\\Users\\bm\\source\\repos\\stbaeumer\\MinuitMachine\\src\\MinuitMachine.Client\\MinuitMachine.Client.csproj",
+        "packagesPath": "C:\\Users\\bm\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\bm\\source\\repos\\stbaeumer\\MinuitMachine\\src\\MinuitMachine.Client\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/home/stefan/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\bm\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -32,7 +38,13 @@
           "warnAsError": [
             "NU1605"
           ]
-        }
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
       },
       "frameworks": {
         "net8.0": {
@@ -50,13 +62,13 @@
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.21, )",
+              "version": "[8.0.22, )",
               "autoReferenced": true
             },
             "Microsoft.NET.Sdk.WebAssembly.Pack": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.11, )",
+              "version": "[10.0.0, )",
               "autoReferenced": true
             },
             "NSwag.MSBuild": {
@@ -79,7 +91,7 @@
           "downloadDependencies": [
             {
               "name": "Microsoft.NETCore.App.Runtime.Mono.browser-wasm",
-              "version": "[8.0.11, 8.0.11]"
+              "version": "[8.0.22, 8.0.22]"
             }
           ],
           "frameworkReferences": {
@@ -87,7 +99,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/8.0.121/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100/PortableRuntimeIdentifierGraph.json"
         }
       },
       "runtimes": {

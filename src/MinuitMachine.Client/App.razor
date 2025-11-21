@@ -1,7 +1,7 @@
 <Router AppAssembly="typeof(App).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="routeData" DefaultLayout="typeof(Shared.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        <FocusOnNavigate RouteData="routeData" Selector="a[aria-label='Verbindung herstellen']" />
     </Found>
     <NotFound>
         <LayoutView Layout="typeof(Shared.MainLayout)">
